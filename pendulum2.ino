@@ -46,7 +46,7 @@ void timerFire() {
 //  gX = mySensor.gyroX();
   gY = mySensor.gyroY() + GY_OFFSET;
 //  gZ = mySensor.gyroZ();
-  phi += gY * Ts/1000.0;
+  phi += gY * Ts;
   phi_acc = atan2(aZ,-aX);//加速度センサからの姿勢推定
   kphi.update(gY*DEG2RAD,phi_acc);
   hdphi.update(gY*DEG2RAD);
@@ -64,8 +64,8 @@ void timerFire() {
   //ref.d2theta = sin_wave.output;
 //  ref.d2theta = -(+0.516 * state.theta + 1.2477 * state.dtheta + 1016.8614 * state.phi + 87.5655 *state.dphi);
     ref.d2theta = -(+0.516 * state.theta + 0.2477 * state.dtheta + 1016.8614 * state.phi + 87.5655 *state.dphi);  
-  ref.dtheta = trape_integral(Ts/1000.0,ref_bfr.d2theta,ref.d2theta,ref.dtheta);
-  ref.theta = trape_integral(Ts/1000.0,ref_bfr.dtheta,ref.dtheta,ref.theta);//@todo摩擦補償
+  ref.dtheta = trape_integral(Ts,ref_bfr.d2theta,ref.d2theta,ref.dtheta);
+  ref.theta = trape_integral(Ts,ref_bfr.dtheta,ref.dtheta,ref.theta);//@todo摩擦補償
   dead_zone_compensate(ref_bfr.dtheta,ref.dtheta,ref.theta,10.0*DEG2RAD);//不感帯補償
   //ref.theta = sin_wave.output;
 //出力計算
@@ -116,7 +116,7 @@ void setup() {
   attachInterrupt(1, ENC_READ, CHANGE);
 
   //timer2の設定
-  MsTimer2::set(Ts, timerFire);
+  MsTimer2::set((int)(Ts*1000), timerFire);
   MsTimer2::start();
 
   //init
